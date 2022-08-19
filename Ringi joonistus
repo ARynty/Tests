@@ -21,6 +21,7 @@ class Program
         }
         while (raadius <= 0);
 
+
         Console.WriteLine();
         double rIn = raadius - laius, rOut = raadius + laius;
 
