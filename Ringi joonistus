@@ -12,7 +12,7 @@ class Program
 
         do
         {
-            Console.Write("Sisesta raadius:");
+            Console.Write("Program joonistab ringi raadiuse alusel\nSisesta raadius:");
             if (!double.TryParse(Console.ReadLine(), out raadius) || raadius <= 0)
                 //kontrollib väärtust
             {
@@ -20,7 +20,6 @@ class Program
             }
         }
         while (raadius <= 0);
-
 
         Console.WriteLine();
         double rIn = raadius - laius, rOut = raadius + laius;
