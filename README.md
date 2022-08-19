@@ -1,1 +1,1 @@
-Harjutamise programmid
+Enda jaoks harjutamise programmid
