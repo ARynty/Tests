@@ -1,0 +1,45 @@
+class Program
+{
+    static void Main(string[] args)
+    {
+        //deklareerib atribuudid
+        double raadius;
+        double laius = 0.4;
+        char symbol = 'o';
+        ConsoleColor BorderColor = ConsoleColor.Green;
+        Console.ForegroundColor = BorderColor;
+        
+
+        do
+        {
+            Console.Write("Sisesta raadius:");
+            if (!double.TryParse(Console.ReadLine(), out raadius) || raadius <= 0)
+                //kontrollib väärtust
+            {
+                Console.WriteLine("Raadius peab olema positiivne number yle 0");
+            }
+        }
+        while (raadius <= 0);
+
+        Console.WriteLine();
+        double rIn = raadius - laius, rOut = raadius + laius;
+
+        for (double y = raadius; y >= -raadius; --y)
+        {
+            for (double x = -raadius; x < rOut; x += 0.5)
+            {
+                double value = x * x + y * y;
+                if (value >= rIn * rIn && value <= rOut * rOut)
+                {
+                    Console.Write(symbol);
+                }
+                else
+                {
+                    Console.Write(" ");
+                }
+            }
+            Console.WriteLine();
+        }
+        Console.ReadKey();
+    }
+}
