@@ -1,0 +1,206 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Collections;
+using System.Threading;
+
+namespace Snake
+{
+    struct Position
+    {
+        public int rida;
+        public int veerg;
+        public Position(int rida, int veerg)
+        {
+            this.rida = rida;
+            this.veerg = veerg;
+        }
+    }
+
+    class Program
+    {
+        static void Main(string[] args)
+        {
+
+            Console.WriteLine("Snake game\nVäldi takistusi ning püüa toitu\nToit liigub iga 20 sekundi tagant");
+            Console.ReadKey();
+            Console.Clear();
+            //juhtimine jm
+            byte parem = 0;
+            byte vasak = 1;
+            byte alla = 2;
+            byte yles = 3;
+            int toit = 0;
+            int toiduliikumine = 20000;
+
+            Position[] directions = new Position[]
+            {
+                new Position(0, 1), // parem
+                new Position(0, -1), // vasak
+                new Position(1, 0), // alla
+                new Position(-1, 0), // yles
+            };
+            double sleepTime = 200;
+            int direction = parem;
+            Random randomNumbersGenerator = new Random();
+            Console.BufferHeight = Console.WindowHeight;
+            toit = Environment.TickCount;
+
+            List<Position> obstacles = new List<Position>()
+            {
+                new Position(12, 12),
+                new Position(14, 20),
+                new Position(7, 7),
+                new Position(19, 19),
+                new Position(6, 9),
+            };
+            foreach (Position obstacle in obstacles)
+            {
+                Console.ForegroundColor = ConsoleColor.White;
+                Console.SetCursorPosition(obstacle.veerg, obstacle.rida);
+                Console.Write("[]");
+            }
+
+            Queue<Position> snakeElements = new Queue<Position>();
+            for (int i = 0; i <= 5; i++)
+            {
+                snakeElements.Enqueue(new Position(0, i));
+            }
+
+            Position food;
+            do
+            {
+                food = new Position(randomNumbersGenerator.Next(0, Console.WindowHeight),
+                    randomNumbersGenerator.Next(0, Console.WindowWidth));
+            }
+            while (snakeElements.Contains(food) || obstacles.Contains(food));
+            Console.SetCursorPosition(food.veerg, food.rida);
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.Write("%");
+
+            foreach (Position position in snakeElements)
+            {
+                Console.SetCursorPosition(position.veerg, position.rida);
+                Console.ForegroundColor = ConsoleColor.DarkGray;
+                Console.Write("o");
+            }
+
+            while (true)
+            {
+                
+
+                if (Console.KeyAvailable)
+                {
+                    ConsoleKeyInfo userInput = Console.ReadKey();
+                    if (userInput.Key == ConsoleKey.LeftArrow)
+                    {
+                        if (direction != parem) direction = vasak;
+                    }
+                    if (userInput.Key == ConsoleKey.RightArrow)
+                    {
+                        if (direction != vasak) direction = parem;
+                    }
+                    if (userInput.Key == ConsoleKey.UpArrow)
+                    {
+                        if (direction != alla) direction = yles;
+                    }
+                    if (userInput.Key == ConsoleKey.DownArrow)
+                    {
+                        if (direction != yles) direction = alla;
+                    }
+                }
+
+                Position snakeHead = snakeElements.Last();
+                Position nextDirection = directions[direction];
+
+                Position snakeNewHead = new Position(snakeHead.rida + nextDirection.rida,
+                    snakeHead.veerg + nextDirection.veerg);
+
+                if (snakeNewHead.veerg < 0) snakeNewHead.veerg = Console.WindowWidth - 1;
+                if (snakeNewHead.rida < 0) snakeNewHead.rida = Console.WindowHeight - 1;
+                if (snakeNewHead.rida >= Console.WindowHeight) snakeNewHead.rida = 0;
+                if (snakeNewHead.veerg >= Console.WindowWidth) snakeNewHead.veerg = 0;
+
+                if (snakeElements.Contains(snakeNewHead) || obstacles.Contains(snakeNewHead))
+                {
+                    Console.SetCursorPosition(0, 0);
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine("Game over!");
+                    return;
+                }
+
+                Console.SetCursorPosition(snakeHead.veerg, snakeHead.rida);
+                Console.ForegroundColor = ConsoleColor.DarkGray;
+                Console.Write("o");
+
+                snakeElements.Enqueue(snakeNewHead);
+                Console.SetCursorPosition(snakeNewHead.veerg, snakeNewHead.rida);
+                Console.ForegroundColor = ConsoleColor.Gray;
+                if (direction == parem) Console.Write(">");
+                if (direction == vasak) Console.Write("<");
+                if (direction == yles) Console.Write("^");
+                if (direction == alla) Console.Write("v");
+
+
+                if (snakeNewHead.veerg == food.veerg && snakeNewHead.rida == food.rida)
+                {
+                    // ussi toitumine
+                    do
+                    {
+                        food = new Position(randomNumbersGenerator.Next(0, Console.WindowHeight),
+                            randomNumbersGenerator.Next(0, Console.WindowWidth));
+                    }
+                    while (snakeElements.Contains(food) || obstacles.Contains(food));
+                    toit = Environment.TickCount;
+                    Console.SetCursorPosition(food.veerg, food.rida);
+                    Console.ForegroundColor = ConsoleColor.Yellow;
+                    Console.Write("%");
+                    sleepTime--;
+
+                    Position obstacle = new Position();
+                    do
+                    {
+                        obstacle = new Position(randomNumbersGenerator.Next(0, Console.WindowHeight),
+                            randomNumbersGenerator.Next(0, Console.WindowWidth));
+                    }
+                    while (snakeElements.Contains(obstacle) ||
+                        obstacles.Contains(obstacle) ||
+                        (food.rida != obstacle.rida && food.veerg != obstacle.rida));
+                    obstacles.Add(obstacle);
+                    Console.SetCursorPosition(obstacle.veerg, obstacle.rida);
+                    Console.ForegroundColor = ConsoleColor.White;
+                    Console.Write("[]");
+                }
+                else
+                {
+                    // liikumine
+                    Position last = snakeElements.Dequeue();
+                    Console.SetCursorPosition(last.veerg, last.rida);
+                    Console.Write(" ");
+                }
+
+                if (Environment.TickCount - toit >= toiduliikumine)
+                {
+                    Console.SetCursorPosition(food.veerg, food.rida);
+                    Console.Write(" ");
+                    do
+                    {
+                        food = new Position(randomNumbersGenerator.Next(0, Console.WindowHeight),
+                            randomNumbersGenerator.Next(0, Console.WindowWidth));
+                    }
+                    while (snakeElements.Contains(food) || obstacles.Contains(food));
+                    toit = Environment.TickCount;
+                }
+
+                Console.SetCursorPosition(food.veerg, food.rida);
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.Write("%");
+
+                sleepTime -= 0.001;
+
+                Thread.Sleep((int)sleepTime);
+            }
+        }
+    }
+}
