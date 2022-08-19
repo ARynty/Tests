@@ -1,0 +1,43 @@
+#! /bin/bash 
+#FILENAME: argumendid4.sh 
+#DESC: skript, mille abil on tavakasutajal võimalik tervest süsteemist üles leida fail terve ja 
+#osalise nime alusel, root kasutajal on aga võimalik valida, kas otsida faili juurdepääsu
+#õiguste järgi või faili juurdepääsu aja järgi
+
+function checkRights(){ 
+if [( $EUID -ne 0)]; then 
+echo “Tavaotsing” 
+norootsearch
+elif [[ $EUID == 0 ]]; then 
+echo “Root otsing” 
+rootsearch
+exit 1 
+fi 
+}
+
+function norootseach(){ 
+echo “Sisesta otsing” 
+read otsing01
+locate $otsing01 
+}
+
+function rootsearch(){ 
+echo “Mille jargi otsida? \n1.Oigused \n2.Juurdepaasu aeg” 
+read otsing_valik
+case $otsing_valik in 
+1) 
+echo “Sisesta binaarvaartused millega eristada” 
+read bValues01
+find .  -type f -perm $bValues01 
+;;
+2)
+echo “Sisesta paevade arv mille jooksul kasutati” 
+read dValues01
+find . -atime $dValues01 -print -type f
+;;
+*)
+echo “?” 
+;;
+esac
+}
+checkRights
